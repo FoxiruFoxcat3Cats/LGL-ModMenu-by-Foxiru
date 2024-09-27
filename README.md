@@ -11,7 +11,9 @@ Floating mod menu for il2cpp and other native android games. KittyMemory, MSHook
 Support Android 4.4.x up to Android 15. ARMv7 and ARM64 are supported.
 
 ![](Intro.gif)
-
+# What's new?
+- Version: 4.1v-foxiru
+- fixed a menu box when dragging on any sides of the screen getting sticky
 # Known bug
 - Spinner does not show on some devices running Android 11. Should work again on Android 12
 - On some games, menu is using old layout such as Kitkat or Gingerbread when launched without permission. We have not found a way to fix it.
