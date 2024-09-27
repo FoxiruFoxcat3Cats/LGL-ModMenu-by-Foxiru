@@ -398,7 +398,8 @@ public class Menu {
             final View expandedView = mExpanded;
             private float initialTouchX, initialTouchY;
             private int initialX, initialY;
-
+            private boolean isDragging = false;
+    
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
@@ -406,42 +407,62 @@ public class Menu {
                         initialY = vmParams.y;
                         initialTouchX = motionEvent.getRawX();
                         initialTouchY = motionEvent.getRawY();
+                        isDragging = false; 
                         return true;
+    
                     case MotionEvent.ACTION_UP:
-                        int rawX = (int) (motionEvent.getRawX() - initialTouchX);
-                        int rawY = (int) (motionEvent.getRawY() - initialTouchY);
-                        mExpanded.setAlpha(1f);
-                        mCollapsed.setAlpha(1f);
-                        //The check for Xdiff <10 && YDiff< 10 because sometime elements moves a little while clicking.
-                        //So that is click event.
-                        if (rawX < 10 && rawY < 10 && isViewCollapsed()) {
-                            //When user clicks on the image view of the collapsed layout,
-                            //visibility of the collapsed layout will be changed to "View.GONE"
-                            //and expanded view will become visible.
-                            try {
-                                collapsedView.setVisibility(View.GONE);
-                                expandedView.setVisibility(View.VISIBLE);
-                            } catch (NullPointerException e) {
-
+                        if (!isDragging) {
+                            int rawX = (int) (motionEvent.getRawX() - initialTouchX);
+                            int rawY = (int) (motionEvent.getRawY() - initialTouchY);
+                            mExpanded.setAlpha(1f);
+                            mCollapsed.setAlpha(1f);
+    
+                            // Handle click event
+                            if (rawX < 10 && rawY < 10 && isViewCollapsed()) {
+                                try {
+                                    collapsedView.setVisibility(View.GONE);
+                                    expandedView.setVisibility(View.VISIBLE);
+                                } catch (NullPointerException e) {
+                                    // Handle null exception
+                                }
                             }
                         }
                         return true;
+    
                     case MotionEvent.ACTION_MOVE:
                         mExpanded.setAlpha(0.5f);
                         mCollapsed.setAlpha(0.5f);
-                        //Calculate the X and Y coordinates of the view.
-                        vmParams.x = initialX + ((int) (motionEvent.getRawX() - initialTouchX));
-                        vmParams.y = initialY + ((int) (motionEvent.getRawY() - initialTouchY));
-                        //Update the layout with new X & Y coordinate
+    
+                        if (Math.abs(motionEvent.getRawX() - initialTouchX) > 10 || 
+                            Math.abs(motionEvent.getRawY() - initialTouchY) > 10) {
+                            isDragging = true;
+                        }
+    
+                        // Calculate new X and Y coordinates
+                        int newX = initialX + ((int) (motionEvent.getRawX() - initialTouchX));
+                        int newY = initialY + ((int) (motionEvent.getRawY() - initialTouchY));
+    
+                        // Get display size
+                        DisplayMetrics displayMetrics = new DisplayMetrics();
+                        mWindowManager.getDefaultDisplay().getMetrics(displayMetrics);
+                        int screenWidth = displayMetrics.widthPixels;
+                        int screenHeight = displayMetrics.heightPixels;
+    
+                        // Fixed to not Sticky any sides, top or bottom of the screen when dragging.
+                        vmParams.x = Math.max(0, Math.min(newX, screenWidth - rootFrame.getWidth()));
+                        vmParams.y = Math.max(0, Math.min(newY, screenHeight - rootFrame.getHeight()));
+    
+                        // Update the view layout with the new X & Y coordinates
                         mWindowManager.updateViewLayout(rootFrame, vmParams);
                         return true;
+    
                     default:
                         return false;
                 }
             }
         };
     }
-
+	
     private void featureList(String[] listFT, LinearLayout linearLayout) {
         //Currently looks messy right now. Let me know if you have improvements
         int featNum, subFeat = 0;
