@@ -1,6 +1,8 @@
 # Announcement 
 I'll be working this mod menu for good and due to the developer will be leaving soon. i don't know where to start.
 
+Credit to LGLTeam✨
+
 # Introduction
 ![GitHub](https://img.shields.io/github/license/LGLTeam/Android-Mod-Menu?style=flat-square)
 
